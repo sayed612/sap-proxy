@@ -1,15 +1,11 @@
 
-FROM eclipse-temurin:21-jdk
-
-
+FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
-
-
 COPY . .
-
-RUN chmod +x mvnw
-
-RUN ./mvnw clean install -DskipTests
+RUN mvn clean package -DskipTests
 
 
-CMD ["java", "-jar", "sapproxy-0.0.1-SNAPSHOT.jar.original"]
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/sapproxy-0.0.1-SNAPSHOT.jar.original app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
